@@ -18,7 +18,7 @@ pipeline {
                 sh '''
                     ls -la
                     test -f Dockerfile
-                    test -f compose.yaml
+                    test -f docker-compose.yml
                 '''
             }
         }
@@ -28,7 +28,7 @@ pipeline {
                 echo 'Building Docker image'
 
                 sh '''
-                    docker compose build
+                    docker compose -f docker-compose.yml build
                 '''
             }
         }
@@ -38,7 +38,7 @@ pipeline {
                 echo 'Deploying Todo Application'
 
                 sh '''
-                    docker compose up -d --build --remove-orphans
+                    docker compose -f docker-compose.yml up -d --build --remove-orphans
                 '''
             }
         }
