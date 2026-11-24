@@ -1,28 +1,56 @@
-pipeline{
-    agent { label 'dev-server'}
-    
-    stages{
-        stage("Code clone"){
-            steps{
-                sh "whoami"
-            clone("https://github.com/LondheShubham153/django-notes-app.git","main")
+
+pipeline {
+    agent any
+
+    stages {
+
+        stage('Checkout Code') {
+            steps {
+                echo 'Downloading Todo App from GitHub'
+                checkout scm
             }
         }
-        stage("Code Build"){
-            steps{
-            dockerbuild("notes-app","latest")
+
+        stage('Validate Files') {
+            steps {
+                echo 'Checking project files'
+
+                sh '''
+                    ls -la
+                    test -f Dockerfile
+                    test -f compose.yaml
+                '''
             }
         }
-        stage("Push to DockerHub"){
-            steps{
-                dockerpush("dockerHubCreds","notes-app","latest")
+
+        stage('Build Docker Image') {
+            steps {
+                echo 'Building Docker image'
+
+                sh '''
+                    docker compose build
+                '''
             }
         }
-        stage("Deploy"){
-            steps{
-                deploy()
+
+        stage('Deploy Application') {
+            steps {
+                echo 'Deploying Todo Application'
+
+                sh '''
+                    docker compose up -d --build --remove-orphans
+                '''
             }
         }
-        
+    }
+
+    post {
+        success {
+            echo 'Todo App deployed successfully!'
+        }
+
+        failure {
+            echo 'Deployment failed. Check Jenkins Console Output.'
+        }
     }
 }
